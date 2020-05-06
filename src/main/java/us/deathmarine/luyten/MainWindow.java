@@ -31,7 +31,7 @@ public class MainWindow extends JFrame {
     private final JLabel label;
     private final ConfigSaver configSaver;
     private final WindowPosition windowPosition;
-    private final LuytenPreferences luytenPrefs;
+    final LuytenPreferences luytenPrefs;
     private final FileDialog fileDialog;
     private final FileSaver fileSaver;
     public MainMenuBar mainMenuBar;
@@ -397,6 +397,7 @@ public class MainWindow extends JFrame {
     }
 
     private void quit() {
+        DiscordIntegration.stopRPC();
         try {
             windowPosition.readPositionFromWindow(this);
             configSaver.saveConfig();

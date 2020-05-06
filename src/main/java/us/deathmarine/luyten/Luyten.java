@@ -22,7 +22,7 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class Luyten {
 
-    private static final AtomicReference<MainWindow> mainWindowRef = new AtomicReference<>();
+    public static final AtomicReference<MainWindow> mainWindowRef = new AtomicReference<>();
     private static final List<File> pendingFiles = new ArrayList<>();
     private static ServerSocket serverSocket;
 
@@ -45,6 +45,9 @@ public class Luyten {
                 }
                 processPendingFiles();
                 mainWindowRef.get().setVisible(true);
+
+                DiscordIntegration.init();
+                DiscordIntegration.updateRPC(null, null);
             });
         } catch (IOException ex) {
             JOptionPane.showMessageDialog(null, "The software is already running");
@@ -84,6 +87,8 @@ public class Luyten {
     // Function which exits the application if it's running
     public static void quitInstance() {
         final MainWindow mainWindow = mainWindowRef.get();
+        DiscordIntegration.stopRPC();
+
         if (mainWindow != null) {
             mainWindow.onExitMenu();
         }

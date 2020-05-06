@@ -24,12 +24,18 @@ dependencies {
 
     implementation 'com.apple:AppleJavaExtensions:1.4'
 
+    implementation 'com.github.MinnDevelopment:java-discord-rpc:v2.0.1'
+
     //Look and Feel
     implementation 'com.formdev:flatlaf:0.28'
 }
 
 repositories {
     jcenter()
+    maven {
+        name = "Jitpack"
+        url = "https://jitpack.io"
+    }
 }
 
 jpackage {

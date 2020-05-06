@@ -44,6 +44,7 @@ public class MainMenuBar extends JMenuBar {
     private ButtonGroup languagesGroup;
     private ButtonGroup themesGroup;
     private JCheckBoxMenuItem packageExplorerStyle;
+    private JCheckBoxMenuItem discordIntegration;
     private JCheckBoxMenuItem filterOutInnerClassEntries;
     private JCheckBoxMenuItem singleClickOpenEnabled;
     private JCheckBoxMenuItem exitByEscEnabled;
@@ -313,6 +314,19 @@ public class MainMenuBar extends JMenuBar {
 
     private void buildOperationMenu(JMenu operationMenu) {
         operationMenu.removeAll();
+        discordIntegration = new JCheckBoxMenuItem("Discord Integration");
+        discordIntegration.setSelected(luytenPrefs.isDiscordIntegrationEnabled());
+        discordIntegration.addActionListener(e -> {
+            luytenPrefs.setDiscordIntegration(discordIntegration.isSelected());
+
+            if (luytenPrefs.isDiscordIntegrationEnabled()) {
+                DiscordIntegration.init();
+            } else {
+                DiscordIntegration.stopRPC();
+            }
+        });
+        operationMenu.add(discordIntegration);
+
         packageExplorerStyle = new JCheckBoxMenuItem("Package Explorer Style");
         packageExplorerStyle.setSelected(luytenPrefs.isPackageExplorerStyle());
         packageExplorerStyle.addActionListener(e -> {
