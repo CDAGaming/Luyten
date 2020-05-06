@@ -8,7 +8,7 @@ plugins {
 
 group = 'us.deathmarine.luyten'
 
-version = '0.5.5'
+version = '0.5.36'
 
 mainClassName = 'us.deathmarine.luyten.Luyten'
 
@@ -36,6 +36,27 @@ repositories {
         name = "Jitpack"
         url = "https://jitpack.io"
     }
+}
+
+jar {
+    from sourceSets.main.output
+
+    manifest {
+        attributes([
+                "Specification-Title"     : "${rootProject.name}",
+                "Specification-Vendor"    : "deathmarine",
+                "Specification-Version"   : "${archiveVersion}",
+                "Implementation-Title"    : "${rootProject.name}",
+                "Implementation-Version"  : "${archiveVersion}",
+                "Implementation-Vendor"   : "deathmarine",
+                "Main-Class": "${mainClassName}",
+                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+        ])
+    }
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
 }
 
 jpackage {
