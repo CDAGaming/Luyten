@@ -8,13 +8,27 @@ Apache License, Version 2.0
 ## Compilation
 *****
 
-We use maven to handle our dependencies.
+We use gradle to handle our dependencies.
 
-* Install [Maven 3](https://maven.apache.org/download.html)
-* Clone this repo and: `mvn clean install`
+* Install [Gradle 6.3](https://maven.apache.org/download.html)
+* JDK 14
 
 ## Screenshot
-![Screen](https://i.imgur.com/phc59W6.png)
+
+
+#### Light Mode
+
+![image](https://user-images.githubusercontent.com/40338524/79597573-e571ce00-80b8-11ea-8e01-7d7efa053ca7.png)
+
+#### Dark Mode
+
+![image](https://user-images.githubusercontent.com/40338524/79598005-9a0bef80-80b9-11ea-83dd-f4e21e7ff8a5.png)
+
+
+#### Beauty icons
+
+![image](https://user-images.githubusercontent.com/40338524/79597634-00dcd900-80b9-11ea-9319-fc82fdae32d5.png)
+
 
 ### Downloads
 [Releases](https://github.com/deathmarine/Luyten/releases/latest)  
@@ -25,6 +39,10 @@ We use maven to handle our dependencies.
 
 ## Powered by 
 *****
+
+### Procyon
+&copy; 2020 Mike Strobel  
+Updated by KingAspx - Abner Rodrigues
 
 ### Procyon
 &copy; 2015 Mike Strobel  

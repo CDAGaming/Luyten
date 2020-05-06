@@ -2,8 +2,10 @@
 .classpath
 .project
 /bin
+/build
 /target
 /lib
 /resources
+/.gradle/
 /.idea/
 /luyten.iml
