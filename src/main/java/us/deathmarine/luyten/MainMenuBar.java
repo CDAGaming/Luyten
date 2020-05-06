@@ -1,48 +1,20 @@
 package us.deathmarine.luyten;
 
-import com.formdev.flatlaf.FlatDarkLaf;
-import com.formdev.flatlaf.FlatIntelliJLaf;
-import com.formdev.flatlaf.FlatLightLaf;
-import java.awt.Cursor;
-import java.awt.Desktop;
-import java.awt.Font;
-import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import com.strobel.Procyon;
+import com.strobel.decompiler.DecompilerSettings;
+import com.strobel.decompiler.languages.Language;
+import com.strobel.decompiler.languages.Languages;
+
+import javax.swing.*;
+import javax.swing.text.DefaultEditorKit;
+import java.awt.*;
+import java.awt.event.*;
 import java.io.File;
 import java.net.URI;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.ListIterator;
 import java.util.Map;
-
-import javax.swing.AbstractAction;
-import javax.swing.AbstractButton;
-import javax.swing.BoxLayout;
-import javax.swing.ButtonGroup;
-import javax.swing.ButtonModel;
-import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JLabel;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JRadioButtonMenuItem;
-import javax.swing.JTabbedPane;
-import javax.swing.KeyStroke;
-import javax.swing.text.DefaultEditorKit;
-
-import com.strobel.Procyon; 
-import com.strobel.decompiler.DecompilerSettings;
-import com.strobel.decompiler.languages.Language;
-import com.strobel.decompiler.languages.Languages;
-import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
 
 /**
  * Main menu (only MainWindow should be called from here)
@@ -51,8 +23,9 @@ public class MainMenuBar extends JMenuBar {
 
     private static final long serialVersionUID = -7949855817172562075L;
     private final MainWindow mainWindow;
-    private final Map<String, Language> languageLookup = new HashMap<String, Language>();
-
+    private final Map<String, Language> languageLookup = new HashMap<>();
+    private final DecompilerSettings settings;
+    private final LuytenPreferences luytenPrefs;
     private JMenu recentFiles;
     private JMenuItem clearRecentFiles;
     private JCheckBoxMenuItem flattenSwitchBlocks;
@@ -74,8 +47,6 @@ public class MainMenuBar extends JMenuBar {
     private JCheckBoxMenuItem filterOutInnerClassEntries;
     private JCheckBoxMenuItem singleClickOpenEnabled;
     private JCheckBoxMenuItem exitByEscEnabled;
-    private DecompilerSettings settings;
-    private LuytenPreferences luytenPrefs;
 
     public MainMenuBar(MainWindow mainWnd) {
         this.mainWindow = mainWnd;
@@ -175,12 +146,7 @@ public class MainMenuBar extends JMenuBar {
             }
 
             JMenuItem menuItem = new JMenuItem(path);
-            menuItem.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    mainWindow.getModel().loadFile(file);
-                }
-            });
+            menuItem.addActionListener(e -> mainWindow.getModel().loadFile(file));
             recentFiles.add(menuItem);
         }
 
@@ -194,28 +160,20 @@ public class MainMenuBar extends JMenuBar {
         JMenuItem menuItem = new JMenuItem("Open File...");
         menuItem.setAccelerator(
                 KeyStroke.getKeyStroke(KeyEvent.VK_O, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
-        menuItem.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                mainWindow.onOpenFileMenu();
-            }
-        });
+        menuItem.addActionListener(e -> mainWindow.onOpenFileMenu());
         fileMenu.add(menuItem);
         fileMenu.addSeparator();
 
         menuItem = new JMenuItem("Close File");
         menuItem.setAccelerator(
                 KeyStroke.getKeyStroke(KeyEvent.VK_W, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
-        menuItem.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                JTabbedPane house = mainWindow.getModel().house;
+        menuItem.addActionListener(e -> {
+            JTabbedPane house = mainWindow.getModel().house;
 
-                if (e.getModifiers() != 2 || house.getTabCount() == 0) {
-                    mainWindow.onCloseFileMenu();
-                } else {
-                    mainWindow.getModel().closeOpenTab(house.getSelectedIndex());
-                }
+            if (e.getModifiers() != InputEvent.CTRL_MASK || house.getTabCount() == 0) {
+                mainWindow.onCloseFileMenu();
+            } else {
+                mainWindow.getModel().closeOpenTab(house.getSelectedIndex());
             }
         });
         fileMenu.add(menuItem);
@@ -224,23 +182,13 @@ public class MainMenuBar extends JMenuBar {
         menuItem = new JMenuItem("Save As...");
         menuItem.setAccelerator(
                 KeyStroke.getKeyStroke(KeyEvent.VK_E, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
-        menuItem.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                mainWindow.onSaveAsMenu();
-            }
-        });
+        menuItem.addActionListener(e -> mainWindow.onSaveAsMenu());
         fileMenu.add(menuItem);
 
         menuItem = new JMenuItem("Save All...");
         menuItem.setAccelerator(
                 KeyStroke.getKeyStroke(KeyEvent.VK_E, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
-        menuItem.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                mainWindow.onSaveAllMenu();
-            }
-        });
+        menuItem.addActionListener(e -> mainWindow.onSaveAllMenu());
         fileMenu.add(menuItem);
         fileMenu.addSeparator();
 
@@ -248,13 +196,10 @@ public class MainMenuBar extends JMenuBar {
         fileMenu.add(recentFiles);
 
         clearRecentFiles = new JMenuItem("Clear Recent Files");
-        clearRecentFiles.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                RecentFiles.paths.clear();
-                RecentFiles.save();
-                updateRecentFiles();
-            }
+        clearRecentFiles.addActionListener(e -> {
+            RecentFiles.paths.clear();
+            RecentFiles.save();
+            updateRecentFiles();
         });
         fileMenu.add(clearRecentFiles);
 
@@ -264,13 +209,8 @@ public class MainMenuBar extends JMenuBar {
         // automatically
         if (!Boolean.getBoolean("apple.laf.useScreenMenuBar")) {
             menuItem = new JMenuItem("Exit");
-            menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F4, ActionEvent.ALT_MASK));
-            menuItem.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    mainWindow.onExitMenu();
-                }
-            });
+            menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F4, InputEvent.ALT_MASK));
+            menuItem.addActionListener(e -> mainWindow.onExitMenu());
             fileMenu.add(menuItem);
         }
     }
@@ -300,35 +240,22 @@ public class MainMenuBar extends JMenuBar {
         menuItem = new JMenuItem("Select All");
         menuItem.setAccelerator(
                 KeyStroke.getKeyStroke(KeyEvent.VK_A, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
-        menuItem.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                mainWindow.onSelectAllMenu();
-            }
-        });
+        menuItem.addActionListener(e -> mainWindow.onSelectAllMenu());
         editMenu.add(menuItem);
         editMenu.addSeparator();
 
         menuItem = new JMenuItem("Find...");
         menuItem.setAccelerator(
                 KeyStroke.getKeyStroke(KeyEvent.VK_F, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
-        menuItem.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                mainWindow.onFindMenu();
-            }
-        });
+        menuItem.addActionListener(e -> mainWindow.onFindMenu());
         editMenu.add(menuItem);
 
         menuItem = new JMenuItem("Find Next");
         menuItem.setAccelerator(
                 KeyStroke.getKeyStroke(KeyEvent.VK_F3, 0));
-        menuItem.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (mainWindow.findBox != null) {
-                    mainWindow.findBox.fireExploreAction(true);
-                }
+        menuItem.addActionListener(e -> {
+            if (mainWindow.findBox != null) {
+                mainWindow.findBox.fireExploreAction(true);
             }
         });
         editMenu.add(menuItem);
@@ -336,12 +263,9 @@ public class MainMenuBar extends JMenuBar {
         menuItem = new JMenuItem("Find Previous");
         menuItem.setAccelerator(
                 KeyStroke.getKeyStroke(KeyEvent.VK_F3, InputEvent.SHIFT_DOWN_MASK));
-        menuItem.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (mainWindow.findBox != null) {
-                    mainWindow.findBox.fireExploreAction(false);
-                }
+        menuItem.addActionListener(e -> {
+            if (mainWindow.findBox != null) {
+                mainWindow.findBox.fireExploreAction(false);
             }
         });
         editMenu.add(menuItem);
@@ -349,13 +273,7 @@ public class MainMenuBar extends JMenuBar {
         menuItem = new JMenuItem("Find All");
         menuItem.setAccelerator(
                 KeyStroke.getKeyStroke(KeyEvent.VK_G, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
-        menuItem.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                mainWindow.onFindAllMenu();
-
-            }
-        });
+        menuItem.addActionListener(e -> mainWindow.onFindAllMenu());
         editMenu.add(menuItem);
     }
 
@@ -397,61 +315,37 @@ public class MainMenuBar extends JMenuBar {
         operationMenu.removeAll();
         packageExplorerStyle = new JCheckBoxMenuItem("Package Explorer Style");
         packageExplorerStyle.setSelected(luytenPrefs.isPackageExplorerStyle());
-        packageExplorerStyle.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                luytenPrefs.setPackageExplorerStyle(packageExplorerStyle.isSelected());
-                mainWindow.onTreeSettingsChanged();
-            }
+        packageExplorerStyle.addActionListener(e -> {
+            luytenPrefs.setPackageExplorerStyle(packageExplorerStyle.isSelected());
+            mainWindow.onTreeSettingsChanged();
         });
         operationMenu.add(packageExplorerStyle);
 
         filterOutInnerClassEntries = new JCheckBoxMenuItem("Filter Out Inner Class Entries");
         filterOutInnerClassEntries.setSelected(luytenPrefs.isFilterOutInnerClassEntries());
-        filterOutInnerClassEntries.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                luytenPrefs.setFilterOutInnerClassEntries(filterOutInnerClassEntries.isSelected());
-                mainWindow.onTreeSettingsChanged();
-            }
+        filterOutInnerClassEntries.addActionListener(e -> {
+            luytenPrefs.setFilterOutInnerClassEntries(filterOutInnerClassEntries.isSelected());
+            mainWindow.onTreeSettingsChanged();
         });
         operationMenu.add(filterOutInnerClassEntries);
 
         singleClickOpenEnabled = new JCheckBoxMenuItem("Single Click Open");
         singleClickOpenEnabled.setSelected(luytenPrefs.isSingleClickOpenEnabled());
-        singleClickOpenEnabled.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                luytenPrefs.setSingleClickOpenEnabled(singleClickOpenEnabled.isSelected());
-            }
-        });
+        singleClickOpenEnabled.addActionListener(e -> luytenPrefs.setSingleClickOpenEnabled(singleClickOpenEnabled.isSelected()));
         operationMenu.add(singleClickOpenEnabled);
 
         exitByEscEnabled = new JCheckBoxMenuItem("Exit By Esc");
         exitByEscEnabled.setSelected(luytenPrefs.isExitByEscEnabled());
-        exitByEscEnabled.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                luytenPrefs.setExitByEscEnabled(exitByEscEnabled.isSelected());
-            }
-        });
+        exitByEscEnabled.addActionListener(e -> luytenPrefs.setExitByEscEnabled(exitByEscEnabled.isSelected()));
         operationMenu.add(exitByEscEnabled);
     }
 
     private void buildSettingsMenu(JMenu settingsMenu, ConfigSaver configSaver) {
         settingsMenu.removeAll();
-        ActionListener settingsChanged = new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                new Thread() {
-                    @Override
-                    public void run() {
-                        populateSettingsFromSettingsMenu();
-                        mainWindow.onSettingsChanged();
-                    }
-                }.start();
-            }
-        };
+        ActionListener settingsChanged = e -> new Thread(() -> {
+            populateSettingsFromSettingsMenu();
+            mainWindow.onSettingsChanged();
+        }).start();
         flattenSwitchBlocks = new JCheckBoxMenuItem("Flatten Switch Blocks");
         flattenSwitchBlocks.setSelected(settings.getFlattenSwitchBlocks());
         flattenSwitchBlocks.addActionListener(settingsChanged);
@@ -545,62 +439,49 @@ public class MainMenuBar extends JMenuBar {
     private void buildHelpMenu(JMenu helpMenu) {
         helpMenu.removeAll();
         JMenuItem menuItem = new JMenuItem("Legal");
-        menuItem.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                mainWindow.onLegalMenu();
-            }
-        });
+        menuItem.addActionListener(e -> mainWindow.onLegalMenu());
         helpMenu.add(menuItem);
         JMenu menuDebug = new JMenu("Debug");
         menuItem = new JMenuItem("List JVM Classes");
-        menuItem.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                mainWindow.onListLoadedClasses();
-            }
-        });
+        menuItem.addActionListener(e -> mainWindow.onListLoadedClasses());
         menuDebug.add(menuItem);
         helpMenu.add(menuDebug);
         menuItem = new JMenuItem("About");
-        menuItem.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent event) {
-                JPanel pane = new JPanel();
-                pane.setLayout(new BoxLayout(pane, BoxLayout.PAGE_AXIS));
-                JLabel title = new JLabel("Luyten " + Luyten.getVersion());
-                title.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 18));
-                pane.add(title);
-                pane.add(new JLabel("by Deathmarine"));
-                String project = "https://github.com/deathmarine/Luyten/";
-                JLabel link = new JLabel("<HTML><FONT color=\"#000099\"><U>" + project + "</U></FONT></HTML>");
-                link.setCursor(new Cursor(Cursor.HAND_CURSOR));
-                link.addMouseListener(new LinkListener(project, link));
-                pane.add(link);
-                pane.add(new JLabel("Contributions By:"));
-                pane.add(new JLabel("zerdei, toonetown, dstmath"));
-                pane.add(new JLabel("virustotalop, xtrafrancyz,"));
-                pane.add(new JLabel("mbax, quitten, mstrobel,"));
-                pane.add(new JLabel("FisheyLP, and Syquel"));
-                pane.add(new JLabel(" "));
-                pane.add(new JLabel("Powered By:"));
-                String procyon = "https://bitbucket.org/mstrobel/procyon";
-                link = new JLabel("<HTML><FONT color=\"#000099\"><U>" + procyon + "</U></FONT></HTML>");
-                link.setCursor(new Cursor(Cursor.HAND_CURSOR));
-                link.addMouseListener(new LinkListener(procyon, link));
-                pane.add(link);
-                pane.add(new JLabel("Version: " + Procyon.version()));
-                pane.add(new JLabel("(c) 2018 Mike Strobel"));
-                String rsyntax = "https://github.com/bobbylight/RSyntaxTextArea";
-                link = new JLabel("<HTML><FONT color=\"#000099\"><U>" + rsyntax + "</U></FONT></HTML>");
-                link.setCursor(new Cursor(Cursor.HAND_CURSOR));
-                link.addMouseListener(new LinkListener(rsyntax, link));
-                pane.add(link);
-                pane.add(new JLabel("Version: 3.0.2"));
-                pane.add(new JLabel("(c) 2019 Robert Futrell"));
-                pane.add(new JLabel(" "));
-                JOptionPane.showMessageDialog(null, pane);
-            }
+        menuItem.addActionListener(event -> {
+            JPanel pane = new JPanel();
+            pane.setLayout(new BoxLayout(pane, BoxLayout.PAGE_AXIS));
+            JLabel title = new JLabel("Luyten " + Luyten.getVersion());
+            title.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 18));
+            pane.add(title);
+            pane.add(new JLabel("by Deathmarine"));
+            String project = "https://github.com/deathmarine/Luyten/";
+            JLabel link = new JLabel("<HTML><FONT color=\"#000099\"><U>" + project + "</U></FONT></HTML>");
+            link.setCursor(new Cursor(Cursor.HAND_CURSOR));
+            link.addMouseListener(new LinkListener(project, link));
+            pane.add(link);
+            pane.add(new JLabel("Contributions By:"));
+            pane.add(new JLabel("zerdei, toonetown, dstmath"));
+            pane.add(new JLabel("virustotalop, xtrafrancyz,"));
+            pane.add(new JLabel("mbax, quitten, mstrobel,"));
+            pane.add(new JLabel("FisheyLP, and Syquel"));
+            pane.add(new JLabel(" "));
+            pane.add(new JLabel("Powered By:"));
+            String procyon = "https://bitbucket.org/mstrobel/procyon";
+            link = new JLabel("<HTML><FONT color=\"#000099\"><U>" + procyon + "</U></FONT></HTML>");
+            link.setCursor(new Cursor(Cursor.HAND_CURSOR));
+            link.addMouseListener(new LinkListener(procyon, link));
+            pane.add(link);
+            pane.add(new JLabel("Version: " + Procyon.version()));
+            pane.add(new JLabel("(c) 2018 Mike Strobel"));
+            String rsyntax = "https://github.com/bobbylight/RSyntaxTextArea";
+            link = new JLabel("<HTML><FONT color=\"#000099\"><U>" + rsyntax + "</U></FONT></HTML>");
+            link.setCursor(new Cursor(Cursor.HAND_CURSOR));
+            link.addMouseListener(new LinkListener(rsyntax, link));
+            pane.add(link);
+            pane.add(new JLabel("Version: 3.0.2"));
+            pane.add(new JLabel("(c) 2019 Robert Futrell"));
+            pane.add(new JLabel(" "));
+            JOptionPane.showMessageDialog(null, pane);
         });
         helpMenu.add(menuItem);
     }
@@ -647,24 +528,7 @@ public class MainMenuBar extends JMenuBar {
         }
     }
 
-    private class ThemeAction extends AbstractAction {
-
-        private static final long serialVersionUID = -6618680171943723199L;
-        private String xml;
-
-        public ThemeAction(String name, String xml) {
-            putValue(NAME, name);
-            this.xml = xml;
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            luytenPrefs.setThemeXml(xml);
-            mainWindow.onThemesChanged();
-        }
-    }
-
-    private class LinkListener extends MouseAdapter {
+    private static class LinkListener extends MouseAdapter {
 
         String link;
         JLabel label;
@@ -693,5 +557,22 @@ public class MainMenuBar extends JMenuBar {
             label.setText("<HTML><FONT color=\"#000099\"><U>" + link + "</U></FONT></HTML>");
         }
 
+    }
+
+    private class ThemeAction extends AbstractAction {
+
+        private static final long serialVersionUID = -6618680171943723199L;
+        private final String xml;
+
+        public ThemeAction(String name, String xml) {
+            putValue(NAME, name);
+            this.xml = xml;
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            luytenPrefs.setThemeXml(xml);
+            mainWindow.onThemesChanged();
+        }
     }
 }

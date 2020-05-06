@@ -1,12 +1,13 @@
 package us.deathmarine.luyten;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.util.prefs.Preferences;
 import com.strobel.decompiler.DecompilerSettings;
 import com.strobel.decompiler.languages.Language;
 import com.strobel.decompiler.languages.Languages;
 import com.strobel.decompiler.languages.java.JavaFormattingOptions;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.prefs.Preferences;
 
 public class ConfigSaver {
 
@@ -27,13 +28,11 @@ public class ConfigSaver {
     private static final String WINDOW_HEIGHT_ID = "WindowHeight";
     private static final String WINDOW_X_ID = "WindowX";
     private static final String WINDOW_Y_ID = "WindowY";
-
+    private static ConfigSaver theLoadedInstance;
     private DecompilerSettings decompilerSettings;
     private WindowPosition mainWindowPosition;
     private WindowPosition findWindowPosition;
     private LuytenPreferences luytenPreferences;
-
-    private static ConfigSaver theLoadedInstance;
 
     /**
      * Do not instantiate, get the loaded instance
@@ -123,7 +122,7 @@ public class ConfigSaver {
                 field.set(newLuytenPrefs, prefs.get(prefId, defaultStr));
 
             } else if (field.getType() == Boolean.class || field.getType() == boolean.class) {
-                Boolean defaultBool = (Boolean) (defaultVal == null ? new Boolean(false) : defaultVal);
+                Boolean defaultBool = (Boolean) (defaultVal == null ? Boolean.FALSE : defaultVal);
                 field.setBoolean(newLuytenPrefs, prefs.getBoolean(prefId, defaultBool));
 
             } else if (field.getType() == Integer.class || field.getType() == int.class) {
@@ -180,7 +179,7 @@ public class ConfigSaver {
                 prefs.put(prefId, (String) (value == null ? "" : value));
 
             } else if (field.getType() == Boolean.class || field.getType() == boolean.class) {
-                prefs.putBoolean(prefId, (Boolean) (value == null ? new Boolean(false) : value));
+                prefs.putBoolean(prefId, (Boolean) (value == null ? Boolean.FALSE : value));
 
             } else if (field.getType() == Integer.class || field.getType() == int.class) {
                 prefs.putInt(prefId, (Integer) (value == null ? new Integer(0) : value));

@@ -13,7 +13,7 @@ version = '0.5.5'
 mainClassName = 'us.deathmarine.luyten.Luyten'
 
 dependencies {
-    testImplementation     'junit:junit:4.13'
+    testImplementation 'junit:junit:4.13'
 
     implementation 'com.fifesoft:rsyntaxtextarea:3.1.1'
 
@@ -21,9 +21,9 @@ dependencies {
     implementation 'org.bitbucket.mstrobel:procyon-expressions:0.5.36'
     implementation 'org.bitbucket.mstrobel:procyon-reflection:0.5.36'
     implementation 'org.bitbucket.mstrobel:procyon-compilertools:0.5.36'
-     
+
     implementation 'com.apple:AppleJavaExtensions:1.4'
-    
+
     //Look and Feel
     implementation 'com.formdev:flatlaf:0.28'
 }

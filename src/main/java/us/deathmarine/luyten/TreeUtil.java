@@ -1,11 +1,10 @@
 package us.deathmarine.luyten;
 
-import java.util.HashSet;
-import java.util.Set;
-import javax.swing.JTree;
+import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
-import us.deathmarine.luyten.TreeNodeUserObject;
+import java.util.HashSet;
+import java.util.Set;
 
 public class TreeUtil {
 
@@ -61,15 +60,15 @@ public class TreeUtil {
     }
 
     private String getRowPathStr(TreePath trp) {
-        String pathStr = "";
+        StringBuilder pathStr = new StringBuilder();
         if (trp.getPathCount() > 1) {
             for (int i = 1; i < trp.getPathCount(); i++) {
                 DefaultMutableTreeNode node = (DefaultMutableTreeNode) trp.getPathComponent(i);
                 TreeNodeUserObject userObject = (TreeNodeUserObject) node.getUserObject();
-                pathStr = pathStr + userObject.getOriginalName() + "/";
+                pathStr.append(userObject.getOriginalName()).append("/");
             }
         }
-        return pathStr;
+        return pathStr.toString();
     }
 
     public JTree getTree() {

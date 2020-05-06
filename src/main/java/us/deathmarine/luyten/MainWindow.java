@@ -3,39 +3,19 @@ package us.deathmarine.luyten;
 import com.formdev.flatlaf.FlatDarkLaf;
 import com.formdev.flatlaf.FlatIntelliJLaf;
 import com.formdev.flatlaf.FlatLightLaf;
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Toolkit;
+import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
+
+import javax.swing.*;
+import javax.swing.border.BevelBorder;
+import java.awt.*;
 import java.awt.dnd.DropTarget;
-import java.awt.event.ActionEvent;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
-import java.awt.event.KeyEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.event.*;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Iterator;
 import java.util.Vector;
-
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import javax.swing.ImageIcon;
-import javax.swing.JComponent;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JProgressBar;
-import javax.swing.JSplitPane;
-import javax.swing.KeyStroke;
-import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
-import javax.swing.border.BevelBorder;
-
-import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 
 /**
  * Dispatcher
@@ -47,16 +27,16 @@ public class MainWindow extends JFrame {
     private static final String TITLE = "Luyten";
 
     public static Model model;
-    private JProgressBar bar;
-    private JLabel label;
+    private final JProgressBar bar;
+    private final JLabel label;
+    private final ConfigSaver configSaver;
+    private final WindowPosition windowPosition;
+    private final LuytenPreferences luytenPrefs;
+    private final FileDialog fileDialog;
+    private final FileSaver fileSaver;
+    public MainMenuBar mainMenuBar;
     FindBox findBox;
     private FindAllBox findAllBox;
-    private ConfigSaver configSaver;
-    private WindowPosition windowPosition;
-    private LuytenPreferences luytenPrefs;
-    private FileDialog fileDialog;
-    private FileSaver fileSaver;
-    public MainMenuBar mainMenuBar;
 
     public MainWindow(File fileFromCommandLine) {
         configSaver = ConfigSaver.getLoadedInstance();
@@ -141,6 +121,23 @@ public class MainWindow extends JFrame {
         if (RecentFiles.load() > 0) {
             mainMenuBar.updateRecentFiles();
         }
+    }
+
+    private static Iterator<?> list(ClassLoader CL) {
+        Class<?> CL_class = CL.getClass();
+        while (CL_class != java.lang.ClassLoader.class) {
+            CL_class = CL_class.getSuperclass();
+        }
+        java.lang.reflect.Field ClassLoader_classes_field;
+        try {
+            ClassLoader_classes_field = CL_class.getDeclaredField("classes");
+            ClassLoader_classes_field.setAccessible(true);
+            Vector<?> classes = (Vector<?>) ClassLoader_classes_field.get(CL);
+            return classes.iterator();
+        } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
+            Luyten.showExceptionDialog("Exception!", e);
+        }
+        return null;
     }
 
     public void onOpenFileMenu() {
@@ -238,19 +235,17 @@ public class MainWindow extends JFrame {
     }
 
     public void onLegalMenu() {
-        new Thread() {
-            public void run() {
-                try {
-                    bar.setVisible(true);
-                    bar.setIndeterminate(true);
-                    String legalStr = getLegalStr();
-                    MainWindow.this.getModel().showLegal(legalStr);
-                } finally {
-                    bar.setIndeterminate(false);
-                    bar.setVisible(false);
-                }
+        new Thread(() -> {
+            try {
+                bar.setVisible(true);
+                bar.setIndeterminate(true);
+                String legalStr = getLegalStr();
+                MainWindow.this.getModel().showLegal(legalStr);
+            } finally {
+                bar.setIndeterminate(false);
+                bar.setVisible(false);
             }
-        }.start();
+        }).start();
     }
 
     public void onListLoadedClasses() {
@@ -260,9 +255,9 @@ public class MainWindow extends JFrame {
             bar.setVisible(true);
             bar.setIndeterminate(true);
             while (myCL != null) {
-                sb.append("ClassLoader: " + myCL + "\n");
-                for (Iterator<?> iter = list(myCL); iter.hasNext();) {
-                    sb.append("\t" + iter.next() + "\n");
+                sb.append("ClassLoader: ").append(myCL).append("\n");
+                for (Iterator<?> iter = list(myCL); iter.hasNext(); ) {
+                    sb.append("\t").append(iter.next()).append("\n");
                 }
                 myCL = myCL.getParent();
             }
@@ -271,23 +266,6 @@ public class MainWindow extends JFrame {
             bar.setIndeterminate(false);
             bar.setVisible(false);
         }
-    }
-
-    private static Iterator<?> list(ClassLoader CL) {
-        Class<?> CL_class = CL.getClass();
-        while (CL_class != java.lang.ClassLoader.class) {
-            CL_class = CL_class.getSuperclass();
-        }
-        java.lang.reflect.Field ClassLoader_classes_field;
-        try {
-            ClassLoader_classes_field = CL_class.getDeclaredField("classes");
-            ClassLoader_classes_field.setAccessible(true);
-            Vector<?> classes = (Vector<?>) ClassLoader_classes_field.get(CL);
-            return classes.iterator();
-        } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
-            Luyten.showExceptionDialog("Exception!", e);
-        }
-        return null;
     }
 
     private String getLegalStr() {

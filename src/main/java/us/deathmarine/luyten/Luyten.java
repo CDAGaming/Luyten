@@ -1,46 +1,29 @@
 package us.deathmarine.luyten;
 
-import com.formdev.flatlaf.FlatDarkLaf;
 import com.formdev.flatlaf.FlatLightLaf;
-import java.awt.Cursor;
-import java.awt.Desktop;
-import java.awt.Font;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.net.ServerSocket;
-import java.net.URI;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.List;
-import java.util.ArrayList;
 
-import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
-import javax.swing.JLabel;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
+import javax.swing.*;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.CompoundBorder;
 import javax.swing.text.DefaultEditorKit;
+import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.*;
+import java.net.ServerSocket;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Starter, the main class
  */
 public class Luyten {
 
+    private static final AtomicReference<MainWindow> mainWindowRef = new AtomicReference<>();
+    private static final List<File> pendingFiles = new ArrayList<>();
     private static ServerSocket serverSocket;
 
     private static void createInstance(String[] args) {
@@ -55,25 +38,19 @@ public class Luyten {
             // .zip or .jar)
             final File fileFromCommandLine = getFileFromCommandLine(args);
 
-            SwingUtilities.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    if (!mainWindowRef.compareAndSet(null, new MainWindow(fileFromCommandLine))) {
-                        // Already set - so add the files to open
-                        openFileInInstance(fileFromCommandLine);
-                    }
-                    processPendingFiles();
-                    mainWindowRef.get().setVisible(true);
+            SwingUtilities.invokeLater(() -> {
+                if (!mainWindowRef.compareAndSet(null, new MainWindow(fileFromCommandLine))) {
+                    // Already set - so add the files to open
+                    openFileInInstance(fileFromCommandLine);
                 }
+                processPendingFiles();
+                mainWindowRef.get().setVisible(true);
             });
         } catch (IOException ex) {
             JOptionPane.showMessageDialog(null, "The software is already running");
             System.exit(0);
         }
     }
-
-    private static final AtomicReference<MainWindow> mainWindowRef = new AtomicReference<>();
-    private static final List<File> pendingFiles = new ArrayList<>();
 
     public static void main(String[] args) {
         createInstance(args);
@@ -130,7 +107,7 @@ public class Luyten {
         try {
             String line;
             BufferedReader br = new BufferedReader(new InputStreamReader(
-                    ClassLoader.getSystemResourceAsStream("META-INF/maven/us.deathmarine/luyten/pom.properties")));
+                    Objects.requireNonNull(ClassLoader.getSystemResourceAsStream("META-INF/maven/us.deathmarine/luyten/pom.properties"))));
             while ((line = br.readLine()) != null) {
                 if (line.contains("version")) {
                     result = line.split("=")[1];
@@ -148,8 +125,8 @@ public class Luyten {
      * Method allows for users to copy the stacktrace for reporting any issues.
      * Add Cool Hyperlink Enhanced for mouse users.
      *
-     * @param message
-     * @param e
+     * @param message The Exception Message
+     * @param e       The Exception
      */
     public static void showExceptionDialog(String message, Exception e) {
         StringWriter sw = new StringWriter();
@@ -182,22 +159,19 @@ public class Luyten {
             public void mouseClicked(MouseEvent e) {
                 if (SwingUtilities.isRightMouseButton(e)) {
                     new JPopupMenu() {
+                        private static final long serialVersionUID = 562054483562666832L;
+
                         {
                             JMenuItem menuitem = new JMenuItem("Select All");
-                            menuitem.addActionListener(new ActionListener() {
-                                @Override
-                                public void actionPerformed(ActionEvent e) {
-                                    exception.requestFocus();
-                                    exception.selectAll();
-                                }
+                            menuitem.addActionListener(e12 -> {
+                                exception.requestFocus();
+                                exception.selectAll();
                             });
                             this.add(menuitem);
                             menuitem = new JMenuItem("Copy");
                             menuitem.addActionListener(new DefaultEditorKit.CopyAction());
                             this.add(menuitem);
                         }
-
-                        private static final long serialVersionUID = 562054483562666832L;
                     }.show(e.getComponent(), e.getX(), e.getY());
                 }
             }

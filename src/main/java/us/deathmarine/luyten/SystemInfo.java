@@ -6,11 +6,10 @@ public class SystemInfo {
 
     private static final String OS_NAME = System.getProperty("os.name");
     private static final String OS_NAME_LOWER = OS_NAME.toLowerCase(Locale.US);
+    public static boolean IS_MAC = OS_NAME_LOWER.startsWith("mac");
 
     public static void main(String[] args) {
         int teste = 1;
         System.out.println(teste);
     }
-
-    public static boolean IS_MAC = OS_NAME_LOWER.startsWith("mac");
 }

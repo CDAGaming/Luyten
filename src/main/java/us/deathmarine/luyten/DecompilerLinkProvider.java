@@ -1,22 +1,13 @@
 package us.deathmarine.luyten;
 
-import java.io.StringWriter;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import com.strobel.assembler.metadata.FieldDefinition;
-import com.strobel.assembler.metadata.FieldReference;
-import com.strobel.assembler.metadata.MetadataSystem;
-import com.strobel.assembler.metadata.MethodDefinition;
-import com.strobel.assembler.metadata.MethodReference;
-import com.strobel.assembler.metadata.TypeDefinition;
-import com.strobel.assembler.metadata.TypeReference;
+import com.strobel.assembler.metadata.*;
 import com.strobel.core.StringUtilities;
 import com.strobel.decompiler.DecompilationOptions;
 import com.strobel.decompiler.DecompilerSettings;
 import com.strobel.decompiler.PlainTextOutput;
+
+import java.io.StringWriter;
+import java.util.*;
 
 public class DecompilerLinkProvider implements LinkProvider {
 
@@ -48,7 +39,7 @@ public class DecompilerLinkProvider implements LinkProvider {
                         if (uniqueStr != null) {
                             // fix link's underline length: _java.util.HashSet_
                             // -> _HashSet_
-                            text = text.replaceAll("[^\\.]*\\.", "");
+                            text = text.replaceAll("[^.]*\\.", "");
                             int from = stringwriter.getBuffer().length() - text.length();
                             int to = stringwriter.getBuffer().length();
                             definitionToSelectionMap.put(uniqueStr, new Selection(from, to));
@@ -66,7 +57,7 @@ public class DecompilerLinkProvider implements LinkProvider {
                     if (text != null && reference != null) {
                         String uniqueStr = createUniqueStrForReference(reference);
                         if (uniqueStr != null) {
-                            text = text.replaceAll("[^\\.]*\\.", "");
+                            text = text.replaceAll("[^.]*\\.", "");
                             int from = stringwriter.getBuffer().length() - text.length();
                             int to = stringwriter.getBuffer().length();
                             if (reference instanceof FieldReference) {
@@ -138,7 +129,7 @@ public class DecompilerLinkProvider implements LinkProvider {
     }
 
     private TypeReference getMostOuterTypeRef(TypeReference typeRef) {
-        int maxDecraringDepth = typeRef.getFullName().split("(\\.|\\$)").length;
+        int maxDecraringDepth = typeRef.getFullName().split("([.$])").length;
         for (int i = 0; i < maxDecraringDepth; i++) {
             TypeReference declaringTypeRef = typeRef.getDeclaringType();
             if (declaringTypeRef == null) {
@@ -163,10 +154,10 @@ public class DecompilerLinkProvider implements LinkProvider {
             return typeRef;
         }
         String[] nameParts = name.split("\\$");
-        String newName = "";
+        StringBuilder newName = new StringBuilder();
         String sep = "";
         for (int i = 0; i < nameParts.length - 1; i++) {
-            newName = newName + sep + nameParts[i];
+            newName.append(sep).append(nameParts[i]);
             sep = "$";
             String newInternalName = packageName.replaceAll("\\.", "/") + "/" + newName;
             TypeReference newTypeRef = metadataSystem.lookupType(newInternalName);
@@ -240,13 +231,9 @@ public class DecompilerLinkProvider implements LinkProvider {
 
         // check linked field/method exists
         if (uniqueStr.startsWith("method")) {
-            if (findMethodInType(typeDef, uniqueStr) == null) {
-                return false;
-            }
+            return findMethodInType(typeDef, uniqueStr) != null;
         } else if (uniqueStr.startsWith("field")) {
-            if (findFieldInType(typeDef, uniqueStr) == null) {
-                return false;
-            }
+            return findFieldInType(typeDef, uniqueStr) != null;
         }
         return true;
     }
@@ -265,7 +252,7 @@ public class DecompilerLinkProvider implements LinkProvider {
         if (declaredMethods == null) {
             return null;
         }
-        boolean isFound = false;
+        boolean isFound;
         for (MethodDefinition declaredMethod : declaredMethods) {
             isFound = (declaredMethod != null && methodName.equals(declaredMethod.getName()));
             isFound = (isFound && methodErasedSignature.equals(declaredMethod.getErasedSignature()));
@@ -293,7 +280,7 @@ public class DecompilerLinkProvider implements LinkProvider {
         if (declaredFields == null) {
             return null;
         }
-        boolean isFound = false;
+        boolean isFound;
         for (FieldDefinition declaredField : declaredFields) {
             isFound = (declaredField != null && fieldName.equals(declaredField.getName()));
             if (isFound) {
@@ -357,7 +344,7 @@ public class DecompilerLinkProvider implements LinkProvider {
                                 String declaringTypeName = declaringTypeDef.getName();
                                 if (declaringTypeName != null) {
                                     constructorName = StringUtilities.removeLeft(constructorName, declaringTypeName);
-                                    constructorName = constructorName.replaceAll("^(\\.|\\$)", "");
+                                    constructorName = constructorName.replaceAll("^([.$])", "");
                                 }
                             }
                         }
@@ -389,13 +376,13 @@ public class DecompilerLinkProvider implements LinkProvider {
     }
 
     private String erasePackageInfoFromDesc(String desc) {
-        String limiters = "\\(\\)\\<\\>\\[\\]\\?\\s,";
-        desc = desc.replaceAll("(?<=[^" + limiters + "]*)([^" + limiters + "]*)\\.", "");
+        String limiters = "\\(\\)<>\\[]\\?\\s,";
+        desc = desc.replaceAll("(?<=[^" + limiters + "])([^" + limiters + "]*)\\.", "");
         return desc;
     }
 
     public void setDecompilerReferences(MetadataSystem metadataSystem, DecompilerSettings settings,
-            DecompilationOptions decompilationOptions) {
+                                        DecompilationOptions decompilationOptions) {
         this.metadataSystem = metadataSystem;
         this.settings = settings;
         this.decompilationOptions = decompilationOptions;

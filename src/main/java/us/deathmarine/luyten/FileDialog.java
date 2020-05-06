@@ -1,9 +1,9 @@
 package us.deathmarine.luyten;
 
-import java.awt.Component;
-import java.io.File;
-import javax.swing.JFileChooser;
+import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
+import java.awt.*;
+import java.io.File;
 
 /**
  * FileChoosers for Open and Save
@@ -11,8 +11,8 @@ import javax.swing.filechooser.FileFilter;
 public class FileDialog {
 
     private final DirPreferences dirPreferences;
-    private ConfigSaver configSaver;
-    private Component parent;
+    private final ConfigSaver configSaver;
+    private final Component parent;
     private JFileChooser fcOpen;
     private JFileChooser fcSave;
     private JFileChooser fcSaveAll;
@@ -23,19 +23,17 @@ public class FileDialog {
         LuytenPreferences luytenPrefs = configSaver.getLuytenPreferences();
         dirPreferences = new DirPreferences(luytenPrefs);
 
-        new Thread() {
-            public void run() {
-                try {
-                    initOpenDialog();
-                    Thread.sleep(500);
-                    initSaveAllDialog();
-                    Thread.sleep(500);
-                    initSaveDialog();
-                } catch (Exception e) {
-                    Luyten.showExceptionDialog("Exception!", e);
-                }
-            };
-         }.start();
+        new Thread(() -> {
+            try {
+                initOpenDialog();
+                Thread.sleep(500);
+                initSaveAllDialog();
+                Thread.sleep(500);
+                initSaveDialog();
+            } catch (Exception e) {
+                Luyten.showExceptionDialog("Exception!", e);
+            }
+        }).start();
     }
 
     public File doOpenDialog() {
@@ -113,7 +111,7 @@ public class FileDialog {
         return fc;
     }
 
-    public class FileChooserFileFilter extends FileFilter {
+    public static class FileChooserFileFilter extends FileFilter {
 
         String objType;
 

@@ -6,8 +6,8 @@ import java.util.prefs.Preferences;
 
 public class RecentFiles {
 
+    private static final Preferences prefs = Preferences.userNodeForPackage(RecentFiles.class);
     public static ArrayList<String> paths = new ArrayList<>();
-    private static Preferences prefs = Preferences.userNodeForPackage(RecentFiles.class);
 
     public static int load() {
         boolean saveNeeded = false;

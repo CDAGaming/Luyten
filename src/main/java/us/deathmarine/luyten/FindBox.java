@@ -1,51 +1,25 @@
 package us.deathmarine.luyten;
 
-import java.awt.Dimension;
-import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import javax.swing.BorderFactory;
-import javax.swing.GroupLayout;
-import javax.swing.GroupLayout.Alignment;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComponent;
-import javax.swing.JDialog;
-import javax.swing.JLabel;
-import javax.swing.JTextField;
-import javax.swing.KeyStroke;
-import javax.swing.SwingConstants;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rtextarea.SearchContext;
 import org.fife.ui.rtextarea.SearchEngine;
 
+import javax.swing.*;
+import javax.swing.GroupLayout.Alignment;
+import java.awt.*;
+import java.awt.event.*;
+
 public class FindBox extends JDialog {
 
     private static final long serialVersionUID = -4125409760166690462L;
-
+    private final MainWindow mainWindow;
     JCheckBox mcase;
     JCheckBox regex;
     JCheckBox wholew;
     JCheckBox reverse;
     JCheckBox wrap;
-    private JButton findButton;
     JTextField textField;
-    private MainWindow mainWindow;
-
-    public void showFindBox() {
-        this.setVisible(true);
-        this.textField.requestFocus();
-        this.textField.selectAll();
-    }
-
-    public void hideFindBox() {
-        this.setVisible(false);
-    }
+    private JButton findButton;
 
     public FindBox(final MainWindow mainWindow) {
         this.mainWindow = mainWindow;
@@ -125,38 +99,14 @@ public class FindBox extends JDialog {
         this.setVisible(true);
     }
 
-    private class FindButton extends AbstractAction {
+    public void showFindBox() {
+        this.setVisible(true);
+        this.textField.requestFocus();
+        this.textField.selectAll();
+    }
 
-        private static final long serialVersionUID = 75954129199541874L;
-
-        @Override
-        public void actionPerformed(ActionEvent event) {
-            if (textField.getText().length() == 0) {
-                return;
-            }
-
-            RSyntaxTextArea pane = mainWindow.getModel().getCurrentTextArea();
-            if (pane == null) {
-                return;
-            }
-
-            SearchContext context = new SearchContext();
-            context.setSearchFor(textField.getText());
-            context.setMatchCase(mcase.isSelected());
-            context.setRegularExpression(regex.isSelected());
-            context.setSearchForward(!reverse.isSelected());
-            context.setWholeWord(wholew.isSelected());
-
-            if (!SearchEngine.find(pane, context).wasFound()) {
-                if (wrap.isSelected()) {
-                    pane.setSelectionStart(0);
-                    pane.setSelectionEnd(0);
-                } else {
-                    mainWindow.getLabel().setText("Search Complete");
-                }
-            }
-        }
-
+    public void hideFindBox() {
+        this.setVisible(false);
     }
 
     private void setHideOnEscapeButton() {
@@ -194,6 +144,40 @@ public class FindBox extends JDialog {
 
     public void fireExploreAction(boolean direction) {
         new FindExploreAction(direction).actionPerformed(null);
+    }
+
+    private class FindButton extends AbstractAction {
+
+        private static final long serialVersionUID = 75954129199541874L;
+
+        @Override
+        public void actionPerformed(ActionEvent event) {
+            if (textField.getText().length() == 0) {
+                return;
+            }
+
+            RSyntaxTextArea pane = mainWindow.getModel().getCurrentTextArea();
+            if (pane == null) {
+                return;
+            }
+
+            SearchContext context = new SearchContext();
+            context.setSearchFor(textField.getText());
+            context.setMatchCase(mcase.isSelected());
+            context.setRegularExpression(regex.isSelected());
+            context.setSearchForward(!reverse.isSelected());
+            context.setWholeWord(wholew.isSelected());
+
+            if (!SearchEngine.find(pane, context).wasFound()) {
+                if (wrap.isSelected()) {
+                    pane.setSelectionStart(0);
+                    pane.setSelectionEnd(0);
+                } else {
+                    mainWindow.getLabel().setText("Search Complete");
+                }
+            }
+        }
+
     }
 
     class FindExploreAction extends AbstractAction {
