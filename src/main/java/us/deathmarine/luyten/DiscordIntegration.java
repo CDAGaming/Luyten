@@ -4,6 +4,7 @@ import club.minnced.discord.rpc.DiscordEventHandlers;
 import club.minnced.discord.rpc.DiscordRPC;
 import club.minnced.discord.rpc.DiscordRichPresence;
 
+@SuppressWarnings("deprecation")
 public class DiscordIntegration {
     private static DiscordRPC lib;
     private static Thread thread;
