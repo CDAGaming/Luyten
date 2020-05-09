@@ -27,11 +27,11 @@ public class MainWindow extends JFrame {
     private static final String TITLE = "Luyten";
 
     public static Model model;
+    final LuytenPreferences luytenPrefs;
     private final JProgressBar bar;
     private final JLabel label;
     private final ConfigSaver configSaver;
     private final WindowPosition windowPosition;
-    final LuytenPreferences luytenPrefs;
     private final FileDialog fileDialog;
     private final FileSaver fileSaver;
     public MainMenuBar mainMenuBar;
