@@ -10,7 +10,7 @@ Apache License, Version 2.0
 
 We use gradle to handle our dependencies.
 
-* Install [Gradle 6.4](https://maven.apache.org/download.html)
+* Install [Gradle 6.6.1](https://maven.apache.org/download.html)
 * Java 8+
 
 ## Screenshot
